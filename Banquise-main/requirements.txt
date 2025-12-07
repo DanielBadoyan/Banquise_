@@ -1,0 +1,14 @@
+# Dépendances principales de Banquise
+Django==4.2.25
+django-crispy-forms
+crispy-bootstrap5
+django-mathfilters
+reportlab
+numpy
+pandas
+scikit-learn
+openpyxl
+joblib
+
+gunicorn
+whitenoise

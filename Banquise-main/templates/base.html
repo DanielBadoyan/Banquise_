@@ -1,0 +1,515 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BANQUISE | La Banque de Demain{% endblock %}</title>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Banquise">
+    <meta property="og:title" content="Banquise — Gérez votre argent avec une clarté glacée">
+    <meta property="og:description" content="Banquise offre des comptes, cartes, virements, crédits avec scoring IA et une interface fluide et sécurisée.">
+    <meta property="og:image" content="{% static 'docs/open-graph.png' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri|default:'https://banquise.onrender.com' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Banquise — Gérez votre argent avec une clarté glacée">
+    <meta name="twitter:description" content="Comptes, cartes, virements, crédits IA, support intégré et console admin.">
+    <meta name="twitter:image" content="{% static 'docs/open-graph.png' %}"> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" sizes="64x64" href="{% static 'docs/favicon.png' %}">
+    <link rel="icon" type="image/png" sizes="256x256" href="{% static 'docs/favicon.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'docs/favicon.png' %}">
+    <link rel="icon" type="image/png" sizes="1024x1024" href="{% static 'docs/favicon.png' %}">
+    <link rel="icon" type="image/png" sizes="2048x2048" href="{% static 'docs/favicon.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'docs/favicon.png' %}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Outfit"', 'sans-serif'],
+                    },
+                    colors: {
+                        ice: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e', 950: '#082f49' }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(56, 189, 248, 0.5)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+                    },
+                    keyframes: {
+                        blob: { "0%": { transform: "translate(0px, 0px) scale(1)" }, "33%": { transform: "translate(30px, -50px) scale(1.1)" }, "66%": { transform: "translate(-20px, 20px) scale(0.9)" }, "100%": { transform: "translate(0px, 0px) scale(1)" } },
+                    },
+                    animation: { blob: "blob 7s infinite cubic-bezier(0.6, 0.4, 0.4, 0.6)" },
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="{% static 'css/banquise.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body data-auth="{{ user.is_authenticated|yesno:'1,0' }}"
+    class="text-slate-800 antialiased flex flex-col min-h-screen overflow-x-hidden selection:bg-ice-200 selection:text-ice-900">
+
+    {% block navbar %}
+    <nav id="main-nav" class="fixed w-full z-50 transition-all duration-300 border-b border-transparent top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 group relative z-50">
+                    <div
+                        class="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shadow-slate-500/20 group-hover:shadow-ice-500/30 group-hover:scale-105 transition-all duration-300 bg-white border border-slate-200">
+                        <img src="{% static 'docs/logobanquise.png' %}" alt="Banquise"
+                            class="w-full h-full object-contain">
+                    </div>
+                    <span class="font-display font-bold text-2xl tracking-tight text-slate-900">BANQUISE</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <div class="flex items-center gap-6 mr-4">
+                        <a href="{% url 'produits_comptes' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">Comptes</a>
+                        <a href="{% url 'produits_cartes' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">Cartes</a>
+                        <a href="{% url 'produits_epargne' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">Épargne</a>
+                        <a href="{% url 'tarifs' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">Tarifs</a>
+                        <a href="{% url 'a_propos' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">À
+                            propos</a>
+                        <a href="{% url 'support' %}"
+                            class="text-sm font-semibold text-slate-600 hover:text-ice-600 transition-colors">FAQ</a>
+                    </div>
+                    <div class="h-6 w-px bg-slate-200"></div>
+                    {% if user.is_authenticated %}
+                    <div class="flex items-center gap-4">
+                        <a href="{% url 'dashboard' %}"
+                            class="text-sm font-bold text-slate-700 hover:text-ice-600 transition-colors">Mon Espace</a>
+                        <a href="{% url 'profil' %}"
+                            class="text-sm font-bold text-slate-700 hover:text-ice-600 transition-colors">Mon Profil</a>
+
+                        <div class="relative group">
+                            <button
+                                class="flex items-center gap-2 py-1.5 pl-2 pr-4 rounded-full bg-white/50 border border-slate-200 hover:bg-white hover:shadow-md transition-all">
+                                <div
+                                    class="relative w-8 h-8 rounded-full bg-gradient-to-tr from-ice-400 to-blue-500 flex items-center justify-center text-white shadow-sm">
+                                    <span class="text-xs font-bold">{{ user.username|slice:":2"|upper }}</span>
+                                    {% if unread_notifs and unread_notifs > 0 %}
+                                    <span
+                                        class="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-red-500 border border-white"></span>
+                                    {% endif %}
+                                </div>
+                                <i
+                                    class="bi bi-chevron-down text-xs text-slate-400 group-hover:rotate-180 transition-transform"></i>
+                            </button>
+                            <div
+                                class="absolute right-0 mt-4 w-60 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform group-hover:translate-y-0 translate-y-2 transition-all duration-200 overflow-hidden">
+                                <div class="p-4 border-b border-slate-100">
+                                    <p class="text-sm font-bold text-slate-900">{{ user.username }}</p>
+                                    <p class="text-xs text-slate-500 truncate">{{ user.email }}</p>
+                                </div>
+                                <div class="p-2">
+                                    <a href="{% url 'profil' %}"
+                                        class="block px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors"><i
+                                            class="bi bi-person mr-2"></i> Mon Profil</a>
+                                    <a href="{% url 'dashboard' %}"
+                                        class="block px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors"><i
+                                            class="bi bi-speedometer2 mr-2"></i> Tableau de bord</a>
+                                    {% if user.is_staff %}
+                                    <a href="{% url 'admin_dashboard' %}"
+                                        class="block px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors"><i
+                                            class="bi bi-badge-ad mr-2"></i> Admin Dashboard</a>
+                                    <a href="{% url 'admin_manage' %}"
+                                        class="block px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors"><i
+                                            class="bi bi-tools mr-2"></i> Gestion</a>
+                                    <a href="{% url 'admin_manage_credits' %}"
+                                        class="block px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors"><i
+                                            class="bi bi-bank mr-2"></i> Validation crédits</a>
+                                    {% endif %}
+                                    <a href="{% url 'notifications' %}"
+                                        class="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-ice-50 rounded-xl transition-colors">
+                                        <i class="bi bi-bell mr-2"></i> Notifications
+                                        {% if unread_notifs and unread_notifs > 0 %}
+                                        <span class="ml-2 inline-flex w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                <div class="p-2 border-t border-slate-100">
+                                    <form action="{% url 'logout' %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-colors flex items-center"><i
+                                                class="bi bi-box-arrow-right mr-2"></i> Déconnexion</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex items-center gap-4">
+                        <a href="{% url 'login' %}"
+                            class="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors px-4 py-2">Connexion</a>
+                        <a href="{% url 'register' %}"
+                            class="group relative px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold overflow-hidden shadow-lg hover:shadow-slate-900/40 hover:-translate-y-0.5 transition-all duration-300">
+                            <div
+                                class="absolute inset-0 w-full h-full bg-gradient-to-r from-ice-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            </div>
+                            <span class="relative flex items-center gap-2">Ouvrir un compte <i
+                                    class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i></span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <button id="mobile-menu-btn"
+                    class="md:hidden p-2 rounded-xl text-slate-900 hover:bg-slate-100 transition-colors relative z-50">
+                    <i class="bi bi-list text-2xl" id="mobile-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu"
+            class="fixed inset-0 bg-gradient-to-b from-white via-white to-white/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-24 opacity-0 invisible transition-all duration-300">
+            <div class="max-w-md w-full px-6 py-10 space-y-6">
+                {% if user.is_authenticated %}
+                <div class="bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                    <div
+                        class="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-ice-400 to-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                        {{ user.username|slice:":2"|upper }}
+                        {% if unread_notifs and unread_notifs > 0 %}
+                        <span
+                            class="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-red-500 border border-white"></span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-500">Connecté</p>
+                        <p class="text-lg font-bold text-slate-900 truncate">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="text-xs text-slate-500 truncate">{{ user.email }}</p>
+                    </div>
+                    <form action="{% url 'logout' %}" method="post" class="ml-2">{% csrf_token %}
+                        <button class="text-xs font-bold text-red-500 border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1"><i class="bi bi-box-arrow-right"></i> Quitter</button>
+                    </form>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{% url 'dashboard' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg">
+                        <i class="bi bi-speedometer2 text-lg"></i> <span>Dashboard</span>
+                    </a>
+                    <a href="{% url 'profil' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-person-circle text-lg text-ice-600"></i> <span>Profil</span>
+                    </a>
+                    <a href="{% url 'cartes' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-credit-card-2-front text-lg text-purple-500"></i> <span>Cartes</span>
+                    </a>
+                    <a href="{% url 'produits_comptes' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-wallet2 text-lg text-emerald-500"></i> <span>Comptes</span>
+                    </a>
+                    <a href="{% url 'abonnements' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-stars text-lg text-amber-500"></i> <span>Abonnements</span>
+                    </a>
+                    <a href="{% url 'tarifs' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-receipt text-lg text-cyan-500"></i> <span>Tarifs</span>
+                    </a>
+                    <a href="{% url 'notifications' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-bell text-lg text-rose-500"></i>
+                        <span>Notifications</span>
+                        {% if unread_notifs and unread_notifs > 0 %}
+                        <span class="ml-auto inline-flex w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'chat_support' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-chat-dots text-lg text-blue-500"></i> <span>Support</span>
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'admin_dashboard' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-ice-200 bg-ice-50 font-bold text-ice-800">
+                        <i class="bi bi-badge-ad text-lg"></i> <span>Admin</span>
+                    </a>
+                    <a href="{% url 'admin_manage_credits' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-ice-200 bg-ice-50 font-bold text-ice-800">
+                        <i class="bi bi-bank text-lg"></i> <span>Crédits</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="bg-white/90 border border-slate-200 rounded-2xl p-5 shadow-sm text-left space-y-3">
+                    <p class="text-xs font-bold text-ice-600 uppercase tracking-[0.2em]">Banquise</p>
+                    <p class="text-2xl font-display font-bold text-slate-900 leading-tight">Un compte clair, un design
+                        cool.</p>
+                    <p class="text-sm text-slate-500">Ouvre un compte en 3 minutes et profite des paiements instantanés.</p>
+                    <div class="flex flex-col gap-3">
+                        <a href="{% url 'register' %}" data-close-mobile-menu
+                            class="w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-center shadow-lg">Ouvrir
+                            un compte</a>
+                        <a href="{% url 'login' %}" data-close-mobile-menu
+                            class="w-full py-3 rounded-xl border border-slate-200 text-slate-800 font-bold text-center">Connexion</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{% url 'produits_comptes' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-wallet2 text-lg text-emerald-500"></i> <span>Comptes</span>
+                    </a>
+                    <a href="{% url 'tarifs' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-receipt text-lg text-cyan-500"></i> <span>Tarifs</span>
+                    </a>
+                    <a href="{% url 'abonnements' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-stars text-lg text-amber-500"></i> <span>Abonnements</span>
+                    </a>
+                    <a href="{% url 'faq' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-question-circle text-lg text-purple-500"></i> <span>FAQ</span>
+                    </a>
+                    <a href="{% url 'a_propos' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-info-circle text-lg text-indigo-500"></i> <span>À propos</span>
+                    </a>
+                    <a href="{% url 'chat_support' %}" data-close-mobile-menu
+                        class="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-800">
+                        <i class="bi bi-chat-dots text-lg text-blue-500"></i> <span>Support</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <div id="scroll-progress" class="scroll-progress" aria-hidden="true">
+        <div id="scroll-progress-bar"></div>
+    </div>
+
+    <main class="flex-grow w-full relative z-10 {% block main_padding %}pt-20{% endblock %}">
+        {% if messages %}
+        <div class="absolute top-24 left-0 right-0 z-40 px-4 pointer-events-none">
+            <div class="max-w-xl mx-auto space-y-2 pointer-events-auto">
+                {% for message in messages %}
+                <div
+                    class="toast p-4 rounded-xl flex items-center gap-3 shadow-lg border animate-slide-down {% if message.tags == 'success' %}bg-green-50/95 border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-50/95 border-red-200 text-red-800{% else %}bg-blue-50/95 border-blue-200 text-blue-800{% endif %} backdrop-blur-md">
+                    <i
+                        class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% elif message.tags == 'error' %}bi-exclamation-circle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+                    <span class="font-medium text-sm">{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="bg-white/80 backdrop-blur-xl border-t border-slate-200/60 pt-20 pb-10 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-12 gap-12 mb-16">
+
+                <div class="md:col-span-4 space-y-6">
+                    <a href="{% url 'home' %}" class="flex items-center gap-3 group w-fit">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-lg group-hover:shadow-ice-500/30 transition-all duration-300 overflow-hidden">
+                            <img src="{% static 'docs/logobanquise.png' %}" alt="Banquise"
+                                class="w-full h-full object-contain">
+                        </div>
+                        <span class="font-display font-bold text-2xl tracking-tight text-slate-900">BANQUISE</span>
+                    </a>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        La première néobanque conçue pour simplifier votre vie financière avec clarté, intelligence et
+                        sécurité. Brisez la glace avec vos finances.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all duration-300"><i
+                                class="bi bi-twitter"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all duration-300"><i
+                                class="bi bi-linkedin"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-pink-600 hover:text-white flex items-center justify-center transition-all duration-300"><i
+                                class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 md:col-start-6">
+                    <h4 class="font-display font-bold text-slate-900 mb-6">Produits</h4>
+                    <ul class="space-y-4 text-sm text-slate-500">
+                        <li><a href="{% url 'produits_comptes' %}" class="hover:text-ice-600 transition-colors">Compte
+                                Courant</a></li>
+                        <li><a href="{% url 'produits_cartes' %}" class="hover:text-ice-600 transition-colors">Cartes
+                                Metal</a></li>
+                        <li><a href="{% url 'produits_epargne' %}" class="hover:text-ice-600 transition-colors">Épargne
+                                +</a></li>
+                        <li><a href="{% url 'simulation' %}" class="hover:text-ice-600 transition-colors">Crédits</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-2">
+                    <h4 class="font-display font-bold text-slate-900 mb-6">Entreprise</h4>
+                    <ul class="space-y-4 text-sm text-slate-500">
+                        <li><a href="{% url 'a_propos' %}" class="hover:text-ice-600 transition-colors">À propos</a>
+                        </li>
+                        <li><a href="{% url 'carrieres' %}" class="hover:text-ice-600 transition-colors">Carrières</a>
+                        </li>
+                        <li><a href="{% url 'presse' %}" class="hover:text-ice-600 transition-colors">Presse</a></li>
+                        <li><a href="{% url 'partenaires' %}"
+                                class="hover:text-ice-600 transition-colors">Partenaires</a></li>
+                        <li><a href="{% url 'apis' %}" class="hover:text-ice-600 transition-colors">APIs</a></li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-3">
+                    <h4 class="font-display font-bold text-slate-900 mb-6">Restez informé</h4>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input type="email" placeholder="Votre email"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-ice-500 focus:ring-2 focus:ring-ice-500/20 text-sm">
+                            <button
+                                class="absolute right-2 top-1.5 p-1.5 bg-slate-900 text-white rounded-lg hover:bg-ice-600 transition-colors"><i
+                                    class="bi bi-arrow-right-short text-lg"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-400">Inscrivez-vous pour recevoir nos dernières actualités.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-400 text-xs font-medium">© {% now "Y" %} Banquise Financial. Agrément ACPR n°12345.
+                </p>
+                <div class="flex gap-6 text-xs font-medium text-slate-500">
+                    <a href="{% url 'mentions_legales' %}" class="hover:text-slate-900 transition-colors">Mentions
+                        Légales</a>
+                    <a href="{% url 'confidentialite' %}"
+                        class="hover:text-slate-900 transition-colors">Confidentialité</a>
+                    <a href="{% url 'cookies' %}" class="hover:text-slate-900 transition-colors">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Dock d’actions rapides (caché sur login/register) -->
+    {% if request.resolver_match and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' and request.resolver_match.url_name != 'support' %}
+    <div class="floating-dock flex">
+        {% if user.is_authenticated %}
+        {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" class="dock-btn primary"><i class="bi bi-badge-ad"></i><span class="dock-label">Admin</span></a>
+        <a href="{% url 'admin_manage_credits' %}" class="dock-btn secondary"><i class="bi bi-bank"></i><span class="dock-label">Crédit</span></a>
+        <a href="{% url 'notifications' %}" class="dock-btn secondary"><i class="bi bi-bell"></i><span class="dock-label">Notifs</span>
+            {% if unread_notifs and unread_notifs > 0 %}
+            <span class="notification-dot dock-dot"></span>
+            {% endif %}
+        </a>
+        {% else %}
+        <a href="{% url 'virement' %}" class="dock-btn primary"><i class="bi bi-lightning-charge-fill"></i><span class="dock-label">Virement</span></a>
+        <a href="{% url 'chat_support' %}" class="dock-btn secondary"><i class="bi bi-chat-dots"></i><span class="dock-label">Support</span></a>
+        <a href="{% url 'notifications' %}" class="dock-btn secondary"><i class="bi bi-bell"></i><span class="dock-label">Notifs</span>
+            {% if unread_notifs and unread_notifs > 0 %}
+            <span class="notification-dot dock-dot"></span>
+            {% endif %}
+        </a>
+        {% endif %}
+        {% else %}
+        <a href="{% url 'register' %}" class="dock-btn primary"><i class="bi bi-magic"></i><span class="dock-label">Créer un compte</span></a>
+        <a href="{% url 'support' %}" class="dock-btn secondary"><i class="bi bi-question-circle"></i><span class="dock-label">Nous contacter</span></a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Effet sticky + burger mobile
+        const nav = document.getElementById('main-nav');
+        if (nav) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) { nav.classList.add('bg-white/80', 'backdrop-blur-lg', 'shadow-sm', 'border-white/20'); nav.classList.remove('border-transparent'); }
+                else { nav.classList.remove('bg-white/80', 'backdrop-blur-lg', 'shadow-sm', 'border-white/20'); nav.classList.add('border-transparent'); }
+            });
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileIcon = document.getElementById('mobile-icon');
+            let isMobileOpen = false;
+            const mobileLinks = document.querySelectorAll('[data-close-mobile-menu]');
+            const toggleMobile = (forceClose = false) => {
+                isMobileOpen = forceClose ? false : !isMobileOpen;
+                if (isMobileOpen) { mobileMenu.classList.remove('opacity-0', 'invisible'); mobileIcon.classList.replace('bi-list', 'bi-x-lg'); document.body.style.overflow = 'hidden'; }
+                else { mobileMenu.classList.add('opacity-0', 'invisible'); mobileIcon.classList.replace('bi-x-lg', 'bi-list'); document.body.style.overflow = ''; }
+            };
+            mobileBtn.addEventListener('click', () => {
+                toggleMobile();
+            });
+            mobileLinks.forEach(link => link.addEventListener('click', () => toggleMobile(true)));
+            mobileMenu.addEventListener('click', (e) => {
+                if (e.target === mobileMenu) toggleMobile(true);
+            });
+        }
+
+        // Barre de progression de scroll
+        const progressBar = document.getElementById('scroll-progress-bar');
+        const updateProgress = () => {
+            if (!progressBar) return;
+            const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+            const ratio = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+            progressBar.style.width = `${ratio}%`;
+        };
+        updateProgress();
+        window.addEventListener('scroll', updateProgress);
+        window.addEventListener('resize', updateProgress);
+
+        // Hide dock near bottom
+        const dock = document.querySelector('.floating-dock');
+        const toggleDock = () => {
+            if (!dock) return;
+            const remaining = document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+            dock.classList.toggle('is-hidden', remaining < 120);
+        };
+        toggleDock();
+        window.addEventListener('scroll', toggleDock, { passive: true });
+        window.addEventListener('resize', toggleDock, { passive: true });
+
+        // Auto-hide toasts
+        document.querySelectorAll('.toast').forEach((toast, idx) => {
+            const delay = 4000 + idx * 200;
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 500);
+            }, delay);
+        });
+
+        // Empêcher Safari (BFCache) de réafficher une page protégée après logout
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) {
+                // Cache Safari/Firefox : masquer immédiatement puis recharger
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.05s ease';
+                window.location.reload();
+            }
+        });
+        // Certains navigateurs ne déclenchent pas unload => no-op pour invalider BFCache
+        window.addEventListener('unload', () => { });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Virement - Banquise{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles du formulaire */
+    .form-control,
+    .form-select {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: 1px solid #e2e8f0;
+        padding: 0.875rem 1rem;
+        border-radius: 1rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #ffffff;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        outline: none;
+    }
+
+    label {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #475569;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    /* Style pour les messages d'erreur Django */
+    .alert {
+        padding: 1rem;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .alert-error,
+    .alert-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-screen overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
+        <div class="absolute top-20 left-20 w-96 h-96 bg-ice-200 rounded-full blur-3xl opacity-50"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto py-12 px-4">
+
+        <div class="mb-10">
+            <h1 class="text-4xl font-display font-bold text-slate-900">Effectuer un virement</h1>
+            <p class="text-slate-500 text-lg mt-2">Envoyez de l'argent en toute sécurité, instantanément.</p>
+        </div>
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div
+                class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">
+                <i class="bi bi-info-circle-fill mr-2"></i> {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="grid lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-premium p-8 md:p-10 rounded-[2rem] relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-ice-100 to-transparent rounded-full opacity-50 pointer-events-none blur-2xl">
+                    </div>
+
+                    <form method="POST" class="space-y-8 relative z-10">
+                        {% csrf_token %}
+
+                        <div>
+                            <label class="flex items-center gap-2 mb-3">
+                                <i class="bi bi-wallet2 text-ice-600"></i> Compte à débiter
+                            </label>
+                            <div class="relative">
+                                <select name="compte_emetteur" class="form-select appearance-none" required>
+                                    {% for compte in comptes %}
+                                    <option value="{{ compte.id }}">
+                                        {{ compte.get_type_compte_display }} - Solde: {{ compte.solde }} €
+                                    </option>
+                                    {% empty %}
+                                    <option disabled selected>Aucun compte disponible</option>
+                                    {% endfor %}
+                                </select>
+                                <i
+                                    class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            </div>
+                            {% if form.compte_emetteur.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.compte_emetteur.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <hr class="border-slate-200">
+
+                        <div>
+                            <label class="flex items-center gap-2 mb-3">
+                                <i class="bi bi-person-badge text-ice-600"></i> Destinataire
+                            </label>
+
+                            <div class="mb-4">
+                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">Option 1 : Bénéficiaire
+                                    enregistré</p>
+                                <div class="relative">
+                                    <select name="beneficiaire_enregistre" class="form-select appearance-none">
+                                        <option value="" selected>-- Choisir un bénéficiaire --</option>
+                                        {% for bene in form.beneficiaire_enregistre.field.queryset %}
+                                        <option value="{{ bene.id }}">{{ bene.nom }} ({{ bene.iban }})</option>
+                                        {% endfor %}
+                                    </select>
+                                    <i
+                                        class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-center my-4">
+                                <span
+                                    class="bg-slate-100 text-slate-400 px-3 py-1 rounded-full text-xs font-bold">OU</span>
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">Option 2 : Saisir un IBAN
+                                </p>
+
+                                <div
+                                    class="flex shadow-sm rounded-xl overflow-hidden border border-slate-200 focus-within:border-ice-500 focus-within:ring-4 focus-within:ring-ice-500/10 transition-all bg-white/80">
+
+                                    <div
+                                        class="relative bg-slate-50 border-r border-slate-200 min-w-[130px] max-w-[160px]">
+                                        <select id="iban-prefix"
+                                            class="w-full h-full pl-3 pr-8 py-3 bg-transparent text-slate-700 font-bold font-mono text-sm appearance-none focus:outline-none cursor-pointer truncate">
+                                            <optgroup label="Fréquents">
+                                                <option value="FR76" selected>🇫🇷 FR76</option>
+                                                <option value="BE68">🇧🇪 BE68</option>
+                                                <option value="DE89">🇩🇪 DE89</option>
+                                                <option value="ES64">🇪🇸 ES64</option>
+                                                <option value="IT60">🇮🇹 IT60</option>
+                                                <option value="GB29">🇬🇧 GB29</option>
+                                                <option value="CH93">🇨🇭 CH93</option>
+                                            </optgroup>
+                                            <optgroup label="Monde">
+                                                <option value="AF12">🇦🇫 AF12</option>
+                                                <option value="ZA23">🇿🇦 ZA23</option>
+                                                <option value="AL45">🇦🇱 AL45</option>
+                                                <option value="DZ88">🇩🇿 DZ88</option>
+                                                <option value="DE89">🇩🇪 DE89</option>
+                                                <option value="AD10">🇦🇩 AD10</option>
+                                                <option value="SA33">🇸🇦 SA33</option>
+                                                <option value="AR71">🇦🇷 AR71</option>
+                                                <option value="AM22">🇦🇲 AM22</option>
+                                                <option value="AU55">🇦🇺 AU55</option>
+                                                <option value="AT61">🇦🇹 AT61</option>
+                                                <option value="AZ09">🇦🇿 AZ09</option>
+                                                <option value="BH44">🇧🇭 BH44</option>
+                                                <option value="BE68">🇧🇪 BE68</option>
+                                                <option value="BY11">🇧🇾 BY11</option>
+                                                <option value="BA99">🇧🇦 BA99</option>
+                                                <option value="BR82">🇧🇷 BR82</option>
+                                                <option value="BG35">🇧🇬 BG35</option>
+                                                <option value="CA14">🇨🇦 CA14</option>
+                                                <option value="CN77">🇨🇳 CN77</option>
+                                                <option value="CY51">🇨🇾 CY51</option>
+                                                <option value="KR30">🇰🇷 KR30</option>
+                                                <option value="HR19">🇭🇷 HR19</option>
+                                                <option value="DK21">🇩🇰 DK21</option>
+                                                <option value="EG56">🇪🇬 EG56</option>
+                                                <option value="AE90">🇦🇪 AE90</option>
+                                                <option value="ES64">🇪🇸 ES64</option>
+                                                <option value="EE42">🇪🇪 EE42</option>
+                                                <option value="US01">🇺🇸 US01</option>
+                                                <option value="FI18">🇫🇮 FI18</option>
+                                                <option value="FR76">🇫🇷 FR76</option>
+                                                <option value="GE33">🇬🇪 GE33</option>
+                                                <option value="GR91">🇬🇷 GR91</option>
+                                                <option value="HU58">🇭🇺 HU58</option>
+                                                <option value="IN25">🇮🇳 IN25</option>
+                                                <option value="ID74">🇮🇩 ID74</option>
+                                                <option value="IR83">🇮🇷 IR83</option>
+                                                <option value="IE20">🇮🇪 IE20</option>
+                                                <option value="IS04">🇮🇸 IS04</option>
+                                                <option value="IL38">🇮🇱 IL38</option>
+                                                <option value="IT60">🇮🇹 IT60</option>
+                                                <option value="JP88">🇯🇵 JP88</option>
+                                                <option value="JO52">🇯🇴 JO52</option>
+                                                <option value="KZ66">🇰🇿 KZ66</option>
+                                                <option value="LB15">🇱🇧 LB15</option>
+                                                <option value="LI77">🇱🇮 LI77</option>
+                                                <option value="LT99">🇱🇹 LT99</option>
+                                                <option value="LU55">🇱🇺 LU55</option>
+                                                <option value="MK07">🇲🇰 MK07</option>
+                                                <option value="MT22">🇲🇹 MT22</option>
+                                                <option value="MA48">🇲🇦 MA48</option>
+                                                <option value="MU36">🇲🇺 MU36</option>
+                                                <option value="MR59">🇲🇷 MR59</option>
+                                                <option value="MX81">🇲🇽 MX81</option>
+                                                <option value="MD92">🇲🇩 MD92</option>
+                                                <option value="MC05">🇲🇨 MC05</option>
+                                                <option value="ME17">🇲🇪 ME17</option>
+                                                <option value="NO84">🇳🇴 NO84</option>
+                                                <option value="NZ11">🇳🇿 NZ11</option>
+                                                <option value="PK63">🇵🇰 PK63</option>
+                                                <option value="PS28">🇵🇸 PS28</option>
+                                                <option value="NL95">🇳🇱 NL95</option>
+                                                <option value="PL34">🇵🇱 PL34</option>
+                                                <option value="PT50">🇵🇹 PT50</option>
+                                                <option value="QA79">🇶🇦 QA79</option>
+                                                <option value="RO41">🇷🇴 RO41</option>
+                                                <option value="GB29">🇬🇧 GB29</option>
+                                                <option value="RU03">🇷🇺 RU03</option>
+                                                <option value="SM98">🇸🇲 SM98</option>
+                                                <option value="RS10">🇷🇸 RS10</option>
+                                                <option value="SG65">🇸🇬 SG65</option>
+                                                <option value="SK12">🇸🇰 SK12</option>
+                                                <option value="SI56">🇸🇮 SI56</option>
+                                                <option value="SE30">🇸🇪 SE30</option>
+                                                <option value="CH93">🇨🇭 CH93</option>
+                                                <option value="TN54">🇹🇳 TN54</option>
+                                                <option value="TR14">🇹🇷 TR14</option>
+                                                <option value="UA70">🇺🇦 UA70</option>
+                                                <option value="VN88">🇻🇳 VN88</option>
+                                            </optgroup>
+                                        </select>
+                                        <div
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                            <i class="bi bi-chevron-down text-xs"></i>
+                                        </div>
+                                    </div>
+
+                                    <input type="text" id="iban-body" maxlength="17" placeholder="0000 0000 0000 00"
+                                        class="w-full py-3 px-4 bg-transparent font-mono text-slate-700 placeholder:text-slate-300 focus:outline-none border-none tracking-wider"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(.{4})/g, '$1 ').trim()">
+                                </div>
+
+                                <input type="hidden" name="nouveau_beneficiaire_iban" id="real_iban_input">
+
+                                {% if form.nouveau_beneficiaire_iban.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.nouveau_beneficiaire_iban.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            {% if form.errors.beneficiaire_enregistre or form.errors.nouveau_beneficiaire_iban %}
+                            <p class="text-red-500 text-sm mt-2">Veuillez choisir un bénéficiaire ou saisir un IBAN.</p>
+                            {% endif %}
+                        </div>
+
+                        <hr class="border-slate-200">
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="flex items-center gap-2 mb-3">
+                                    <i class="bi bi-currency-euro text-ice-600"></i> Montant
+                                </label>
+                                <div class="relative">
+                                    <input type="number" step="0.01" min="0.01" name="montant" placeholder="0.00" required
+                                        class="form-control pl-4 pr-16 text-2xl font-bold text-slate-900 placeholder:text-slate-300"
+                                        oninput="if (this.value < 0) this.value = ''; this.value = this.value.replace(/[^0-9.,-]/g, '').replace(',', '.');">
+                                    <span
+                                        class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold">EUR</span>
+                                </div>
+                                {% if form.montant.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.montant.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="flex items-center gap-2 mb-3">
+                                    <i class="bi bi-chat-text text-ice-600"></i> Motif
+                                </label>
+                                <input type="text" name="motif" placeholder="Ex: Loyer" class="form-control h-[3.6rem]">
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-5 rounded-2xl border border-slate-200 bg-white/60 flex items-center justify-between cursor-pointer hover:border-ice-300 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl">
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Virement Instantané</p>
+                                    <p class="text-xs text-slate-500">Arrive en moins de 10s (Gratuit)</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="instantane" value="true" class="sr-only peer" checked>
+                                <div
+                                    class="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-slate-900">
+                                </div>
+                            </label>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 text-lg">
+                            <span>Valider le virement</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-premium p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-900">Bénéficiaires</h3>
+                        <a href="{% url 'beneficiaires' %}"
+                            class="text-xs text-ice-600 font-bold hover:underline">Gérer</a>
+                    </div>
+
+                    <div class="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                        <a href="{% url 'ajouter_beneficiaire' %}"
+                            class="flex flex-col items-center gap-2 min-w-[64px] cursor-pointer group">
+                            <div
+                                class="w-14 h-14 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-ice-500 group-hover:text-ice-500 transition-colors bg-white/50">
+                                <i class="bi bi-plus-lg text-lg"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500 group-hover:text-ice-600">Nouveau</span>
+                        </a>
+
+                        {% for bene in form.beneficiaire_enregistre.field.queryset|slice:":5" %}
+                        <div class="flex flex-col items-center gap-2 min-w-[64px] cursor-pointer group"
+                            onclick="document.querySelector('select[name=beneficiaire_enregistre]').value='{{ bene.id }}'">
+                            <div
+                                class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm border-2 border-white shadow-sm group-hover:shadow-md transition-all uppercase">
+                                {{ bene.nom|slice:":2" }}
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 truncate w-16 text-center">{{ bene.nom }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="flex items-center h-14 pl-2">
+                            <span class="text-xs text-slate-400 italic">Aucun favori</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-[2rem] text-white shadow-xl">
+                    <h3 class="font-display font-bold text-lg mb-6 flex items-center gap-2">
+                        <i class="bi bi-speedometer"></i> Vos plafonds
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between text-xs mb-2 text-slate-300 font-bold">
+                                <span>Virements (Hebdo)</span><span>250 / 3000 €</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                <div class="bg-ice-500 h-1.5 rounded-full" style="width: 8%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-2 text-slate-300 font-bold">
+                                <span>Paiements (Mensuel)</span><span>1200 / 5000 €</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-1.5">
+                                <div class="bg-purple-500 h-1.5 rounded-full" style="width: 24%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'cartes' %}"
+                        class="mt-8 w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold transition-colors border border-white/10 flex items-center justify-center gap-2">
+                        Modifier les plafonds
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const selectBene = document.querySelector('select[name="beneficiaire_enregistre"]');
+    const ibanPrefix = document.getElementById('iban-prefix');
+    const ibanBody = document.getElementById('iban-body');
+    const realIbanInput = document.getElementById('real_iban_input');
+
+    // Fonction pour mettre à jour l'input caché envoyé à Django
+    function updateRealIban() {
+        const prefix = ibanPrefix.value;
+        // On enlève les espaces pour l'envoi
+        const body = ibanBody.value.replace(/\s/g, '');
+
+        if (body.length > 0) {
+            realIbanInput.value = prefix + body;
+            // Si on écrit un IBAN, on désactive la sélection de bénéficiaire
+            selectBene.value = '';
+        } else {
+            realIbanInput.value = '';
+        }
+    }
+
+    // Écouteurs d'événements
+    ibanPrefix.addEventListener('change', updateRealIban);
+    ibanBody.addEventListener('input', updateRealIban);
+
+    // Gestion du conflit entre Select Bénéficiaire et Input IBAN
+    selectBene.addEventListener('change', function () {
+        if (this.value) {
+            ibanBody.value = '';
+            realIbanInput.value = '';
+            ibanBody.disabled = true;
+            ibanPrefix.disabled = true;
+            ibanBody.parentElement.classList.add('opacity-50', 'bg-slate-100');
+        } else {
+            ibanBody.disabled = false;
+            ibanPrefix.disabled = false;
+            ibanBody.parentElement.classList.remove('opacity-50', 'bg-slate-100');
+        }
+    });
+
+    ibanBody.addEventListener('input', function () {
+        if (this.value) {
+            selectBene.value = '';
+        }
+    });
+</script>
+{% endblock %}

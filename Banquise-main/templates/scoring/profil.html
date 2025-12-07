@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Profil - Banquise{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles inchangés */
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .input-label {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .input-field {
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid #e2e8f0;
+        backdrop-filter: blur(4px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .input-field:focus {
+        background-color: #ffffff;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        outline: none;
+    }
+
+    /* Animations */
+    @keyframes blob {
+        0% {
+            transform: translate(0px, 0px) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -50px) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-20px, 20px) scale(0.9);
+        }
+
+        100% {
+            transform: translate(0px, 0px) scale(1);
+        }
+    }
+
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+
+    /* Mini navigation flottante */
+    .profile-mini-nav {
+        position: fixed;
+        right: 1rem;
+        top: 50%;
+        transform: translate(120%, -50%);
+        opacity: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        z-index: 40;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .profile-mini-nav.visible {
+        transform: translate(0, -50%);
+        opacity: 1;
+    }
+
+    .profile-mini-nav a {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f172a;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .profile-mini-nav a:hover {
+        transform: translateX(-4px);
+        background: linear-gradient(120deg, #e0f2fe, #fff);
+        box-shadow: 0 12px 32px rgba(14, 165, 233, 0.25);
+    }
+
+    @media (max-width: 1024px) {
+        .profile-mini-nav {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-screen overflow-hidden">
+
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div
+            class="absolute top-20 left-10 w-[500px] h-[500px] bg-ice-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob">
+        </div>
+        <div
+            class="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob animation-delay-2000">
+        </div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+
+        <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
+            <div>
+                <h1 class="text-4xl font-display font-bold text-slate-900">Mon Profil</h1>
+                <p class="text-slate-500 text-lg mt-2">Gérez vos informations personnelles et bancaires.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-end">
+                {% if user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}"
+                    class="px-5 py-2.5 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors shadow-md">
+                    <i class="bi bi-gear-fill mr-2"></i> Tableau de Bord Admin
+                </a>
+                {% endif %}
+
+                <a href="{% url 'dashboard' %}"
+                    class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
+                    <i class="bi bi-arrow-left mr-2"></i> Retour au Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-1 space-y-6">
+
+                <div
+                    class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
+                    <div
+                        class="absolute top-0 right-0 w-40 h-40 bg-ice-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3">
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div
+                            class="w-24 h-24 rounded-full bg-gradient-to-tr from-ice-400 to-blue-500 flex items-center justify-center text-white shadow-lg mb-4">
+                            <span class="text-3xl font-bold">{{ user.username|slice:":2"|upper }}</span>
+                        </div>
+                        <h2 class="text-2xl font-display font-bold">{{ user.first_name }} {{ user.last_name }}</h2>
+                        <p class="text-slate-400 text-sm mb-6">@{{ user.username }}</p>
+                        <div class="w-full border-t border-white/10 py-6 grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Membre depuis</p>
+                                <p class="font-mono text-ice-300">{{ user.date_joined|date:"M Y" }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Formule</p>
+                                <p class="font-bold text-ice-300">{{ profil.get_abonnement_display }}</p>
+                                {% if profil.abonnement != 'ESSENTIEL' %}
+                                <form method="post" action="{% url 'changer_abonnement' %}" class="mt-3">{% csrf_token %}
+                                    <input type="hidden" name="plan" value="RESILIER">
+                                    <button type="submit" onclick="return confirm('Résilier et revenir à Essentiel à la fin de la période en cours ?');" class="text-xs font-bold text-red-200 hover:text-red-100">Résilier (fin de période)</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-3xl sticky top-24">
+                    <nav class="space-y-1">
+                        <a href="#bank-info"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ice-50 text-ice-700 font-bold transition-colors">
+                            <i class="bi bi-bank2"></i> Banque & RIB
+                        </a>
+                        <a href="#subscription"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors font-medium">
+                            <i class="bi bi-stars"></i> Mon abonnement
+                        </a>
+                        <a href="#infos"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors font-medium">
+                            <i class="bi bi-person-vcard"></i> Informations
+                        </a>
+                        <a href="#security"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors font-medium">
+                            <i class="bi bi-shield-lock"></i> Sécurité
+                        </a>
+                        <a href="{% url 'chat_support' %}"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors font-medium">
+                            <i class="bi bi-chat-dots"></i> Chat Support
+                        </a>
+                        <a href="#danger"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium">
+                            <i class="bi bi-exclamation-triangle"></i> Zone Danger
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-8">
+
+                <div id="bank-info" class="glass-panel p-8 md:p-10 rounded-[2rem]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-display font-bold text-slate-900">Coordonnées Bancaires</h3>
+                        <div class="w-10 h-10 rounded-full bg-ice-50 text-ice-600 flex items-center justify-center">
+                            <i class="bi bi-qr-code text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        {% for compte in comptes %}
+                        <div
+                            class="bg-white/60 border border-slate-100 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-ice-100 to-transparent rounded-bl-full opacity-50">
+                            </div>
+
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h4 class="font-display font-bold text-2xl text-slate-800">
+                                            {{ compte.get_type_compte_display }}
+                                        </h4>
+                                        <p class="text-slate-500 text-sm mt-1">
+                                            Titulaire: {{ user.first_name }} {{user.last_name }}
+                                        </p>
+                                    </div>
+                                    <i class="bi bi-bank text-2xl text-slate-300"></i>
+                                </div>
+
+                                <div class="mb-4 bg-slate-100 p-3 rounded-xl border border-ice-300">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                                        Numéro de Compte</p>
+                                    <p class="font-mono text-xl font-bold text-slate-700">
+                                        {{ compte.numero_compte }}
+                                    </p>
+                                </div>
+
+                                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                                    <div
+                                        class="md:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 group-hover:border-ice-200 transition-colors">
+                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                                            IBAN Complet</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="font-mono font-medium text-slate-700 text-sm truncate"
+                                                id="iban-{{ compte.id }}">{{ compte.numero_compte }}</p>
+                                            <button onclick="copyToClipboard('iban-{{ compte.id }}')"
+                                                class="text-ice-500 hover:text-ice-700 transition-colors"
+                                                title="Copier l'IBAN complet">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="md:col-span-1 bg-slate-50 p-3 rounded-xl border border-slate-200 group-hover:border-ice-200 transition-colors">
+                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                                            BIC / SWIFT</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="font-mono font-medium text-slate-700 text-sm">BANQFR76</p>
+                                            <i class="bi bi-check-circle-fill text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="md:col-span-3 bg-white p-3 rounded-xl border border-slate-200">
+                                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                                            Solde actuel sur ce compte</p>
+                                        <p class="font-display text-xl font-bold text-ice-600">
+                                            {{ compte.solde }} €
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row gap-3 mt-2">
+                                    <button onclick="copyToClipboard('iban-{{ compte.id }}')"
+                                        class="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                                        <i class="bi bi-share-fill text-xs"></i> Copier & Partager
+                                    </button>
+                                    <a href="{% url 'telecharger_rib_pdf' compte.id %}"
+                                        class="flex-1 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                        <i class="bi bi-file-earmark-pdf"></i> Télécharger RIB (PDF)
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-6 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                            <p class="text-slate-500">Aucun compte actif trouvé.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="subscription" class="glass-panel p-8 md:p-10 rounded-[2rem] space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-ice-600">Mon abonnement</p>
+                            <h3 class="text-2xl font-display font-bold text-slate-900 mt-1">{{ profil.get_abonnement_display }}</h3>
+                            <p class="text-sm text-slate-500">Prochaine facturation : {{ profil.prochaine_facturation|date:"d M Y" }}</p>
+                        </div>
+                        <a href="{% url 'abonnements' %}" class="text-sm font-bold text-ice-700 hover:text-ice-900 underline underline-offset-4">Voir les plans</a>
+                    </div>
+
+                    <div class="bg-white/70 border border-slate-100 rounded-2xl p-6 space-y-3">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Avantages inclus</p>
+                        <ul class="space-y-2 text-slate-700 text-sm">
+                            {% if profil.abonnement == 'ESSENTIEL' %}
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Compte courant gratuit et notifications en temps réel.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Virements et prélèvements SEPA standards.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Support standard par messagerie.</li>
+                            {% elif profil.abonnement == 'PLUS' %}
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Tout Essentiel + carte premium virtuelle & physique.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Découvert majoré et virements express.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Support prioritaire et assurances achats/voyage.</li>
+                            {% else %}
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Tout Plus + cartes metal et plafonds optimisés.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Conciergerie 24/7 et assurances premium.</li>
+                            <li class="flex items-start gap-2"><i class="bi bi-check-circle text-ice-500 mt-0.5"></i> Priorité support + gestionnaire dédié.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <form method="post" action="{% url 'changer_abonnement' %}" class="subscription-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan" value="RESILIER">
+                            <input type="hidden" name="password" value="">
+                            <button type="submit"
+                                class="px-5 py-3 rounded-xl border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 transition">
+                                Résilier mon abonnement
+                            </button>
+                        </form>
+                        <a href="{% url 'abonnements' %}"
+                            class="px-5 py-3 rounded-xl bg-ice-600 text-white font-bold text-sm hover:bg-ice-700 transition">
+                            Changer de formule
+                        </a>
+                    </div>
+                </div>
+
+                <div id="infos" class="glass-panel p-8 md:p-10 rounded-[2rem]">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-xl font-display font-bold text-slate-900">Informations Personnelles</h3>
+                        <div class="w-10 h-10 rounded-full bg-ice-50 text-ice-600 flex items-center justify-center">
+                            <i class="bi bi-pencil-fill text-sm"></i>
+                        </div>
+                    </div>
+
+                    <form method="POST" class="space-y-6">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_info" value="1">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="input-label">Prénom</label>
+                                <input type="text" name="first_name" value="{{ user.first_name }}"
+                                    class="w-full px-4 py-3 rounded-xl input-field font-medium text-slate-700" required>
+                            </div>
+                            <div>
+                                <label class="input-label">Nom</label>
+                                <input type="text" name="last_name" value="{{ user.last_name }}"
+                                    class="w-full px-4 py-3 rounded-xl input-field font-medium text-slate-700" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="input-label">Adresse Email</label>
+                                <div class="relative">
+                                    <i
+                                        class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="email" name="email" value="{{ user.email }}"
+                                        class="w-full pl-12 pr-4 py-3 rounded-xl input-field font-medium text-slate-700"
+                                        required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="input-label">Téléphone</label>
+                                <input type="tel" name="telephone" value="{{ profil.telephone|default:'' }}"
+                                    placeholder="+33 6..."
+                                    class="w-full px-4 py-3 rounded-xl input-field font-medium text-slate-700">
+                            </div>
+                            <div>
+                                <label class="input-label">Ville</label>
+                                <input type="text" name="ville" value="{{ profil.ville_naissance|default:'' }}"
+                                    placeholder="Paris"
+                                    class="w-full px-4 py-3 rounded-xl input-field font-medium text-slate-700">
+                            </div>
+                        </div>
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit"
+                                class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-ice-600 hover:shadow-ice-500/30 transition-all transform hover:-translate-y-0.5">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="security" class="glass-panel p-8 md:p-10 rounded-[2rem] relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
+                    <h3 class="text-xl font-display font-bold text-slate-900 mb-8">Modifier le mot de passe</h3>
+
+                    <form method="POST" class="space-y-5">
+                        {% csrf_token %}
+                        <input type="hidden" name="change_password" value="1">
+
+                        <div class="group">
+                            <label class="input-label">Mot de passe actuel</label>
+                            <div class="relative">
+                                <i
+                                    class="bi bi-lock-fill absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition-colors z-10"></i>
+                                <input type="password" name="old_password"
+                                    class="w-full pl-12 pr-4 py-3 rounded-xl input-field font-medium text-slate-700 placeholder-slate-400"
+                                    placeholder="Votre mot de passe actuel" required>
+                            </div>
+                            {% if password_form.old_password.errors %}
+                            <div
+                                class="mt-2 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 animate-slide-down">
+                                <i class="bi bi-x-circle-fill text-red-500 text-lg mt-0.5"></i>
+                                <p class="text-red-700 text-sm font-medium leading-tight">
+                                    {{ password_form.old_password.errors.0 }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="group">
+                            <label class="input-label">Nouveau mot de passe</label>
+                            <div class="relative">
+                                <i
+                                    class="bi bi-key-fill absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition-colors z-10"></i>
+                                <input type="password" name="new_password1"
+                                    class="w-full pl-12 pr-4 py-3 rounded-xl input-field font-medium text-slate-700 placeholder-slate-400"
+                                    placeholder="8 caractères minimum" required>
+                            </div>
+                            {% if password_form.new_password1.errors %}
+                            <div class="mt-2 space-y-2">
+                                {% for error in password_form.new_password1.errors %}
+                                <div
+                                    class="p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 shadow-sm">
+                                    <i class="bi bi-exclamation-triangle-fill text-red-500 text-lg mt-0.5"></i>
+                                    <div>
+                                        <p class="text-red-700 text-sm font-medium leading-tight">{{ error }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="group">
+                            <label class="input-label">Confirmer le mot de passe</label>
+                            <div class="relative">
+                                <i
+                                    class="bi bi-check-circle-fill absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition-colors z-10"></i>
+                                <input type="password" name="new_password2"
+                                    class="w-full pl-12 pr-4 py-3 rounded-xl input-field font-medium text-slate-700 placeholder-slate-400"
+                                    placeholder="Répétez le mot de passe" required>
+                            </div>
+                            {% if password_form.new_password2.errors %}
+                            <div class="mt-2 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+                                <i class="bi bi-shield-slash-fill text-red-500 text-lg mt-0.5"></i>
+                                <p class="text-red-700 text-sm font-medium leading-tight">
+                                    {{ password_form.new_password2.errors.0 }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit"
+                                class="px-8 py-3 bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-700 hover:shadow-purple-300/50 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                                <i class="bi bi-shield-check"></i> Mettre à jour
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="flex items-center justify-between opacity-60 mt-8 pt-8 border-t border-slate-200">
+                        <div>
+                            <p class="font-bold text-slate-800">Double Authentification (2FA)</p>
+                            <p class="text-sm text-slate-500 mt-1">Sécurisez votre compte avec un code SMS (Bientôt).
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-not-allowed">
+                            <input type="checkbox" value="" class="sr-only peer" disabled>
+                            <div
+                                class="w-14 h-8 bg-slate-200 rounded-full peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="danger" class="p-6 rounded-3xl border border-red-100 bg-red-50/50">
+                    <h3 class="font-bold text-red-600 mb-2 flex items-center gap-2">
+                        <i class="bi bi-exclamation-circle-fill"></i> Zone de danger
+                    </h3>
+                    <p class="text-sm text-red-400 mb-4">La suppression de votre compte est irréversible. Contactez le
+                        support pour procéder.</p>
+                    <a href="{% url 'support' %}"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border-2 border-red-200 text-red-600 text-sm font-bold hover:bg-red-600 hover:border-red-600 hover:text-white transition-all">
+                        Contacter le support
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mini navigation flottante affichée après scroll -->
+<div id="profileMiniNav" class="profile-mini-nav" aria-label="Navigation profil">
+    <a href="#bank-info" title="Banque & RIB"><i class="bi bi-bank2"></i></a>
+    <a href="#subscription" title="Mon abonnement"><i class="bi bi-stars"></i></a>
+    <a href="#infos" title="Informations"><i class="bi bi-person-vcard"></i></a>
+    <a href="#security" title="Sécurité"><i class="bi bi-shield-lock"></i></a>
+    <a href="#danger" title="Zone danger"><i class="bi bi-exclamation-triangle"></i></a>
+</div>
+
+<script>
+    function copyToClipboard(elementId) {
+        const copyText = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(copyText).then(() => {
+            alert("IBAN copié dans le presse-papier !");
+        });
+    }
+
+    // Scroll centré sur les sections du profil
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const targetId = link.getAttribute('href').substring(1);
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            e.preventDefault();
+            const y = target.getBoundingClientRect().top + window.scrollY;
+            const offset = window.innerHeight / 2 - target.offsetHeight / 2;
+            window.scrollTo({ top: y - offset, behavior: 'smooth' });
+        });
+    });
+
+    // Affichage mini nav après scroll
+    const miniNav = document.getElementById('profileMiniNav');
+    if (miniNav) {
+        const toggleMiniNav = () => {
+            if (window.scrollY > 240) miniNav.classList.add('visible');
+            else miniNav.classList.remove('visible');
+        };
+        toggleMiniNav();
+        window.addEventListener('scroll', toggleMiniNav, { passive: true });
+    }
+</script>
+{% endblock %}
+<script>
+    // Modal mot de passe réutilisé (si non présent depuis le dashboard)
+    (function () {
+        if (document.getElementById('subPwdModal')) return;
+        const modal = document.createElement('div');
+        modal.id = 'subPwdModal';
+        modal.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm';
+        modal.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md p-6 relative">
+            <button type="button" id="closeSubModal" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600"><i class="bi bi-x-lg"></i></button>
+            <h3 class="text-xl font-display font-bold text-slate-900 mb-1">Confirmer le changement</h3>
+            <p class="text-sm text-slate-500 mb-4">Saisis ton mot de passe pour valider l'action d'abonnement.</p>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-[0.15em]">Mot de passe</label>
+              <input type="password" id="subPwdInput" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-ice-200 focus:border-ice-400 outline-none" placeholder="••••••••">
+            </div>
+            <div class="mt-6 flex gap-3 justify-end">
+              <button type="button" id="cancelSubModal" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50">Annuler</button>
+              <button type="button" id="confirmSubModal" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">Confirmer</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        let pendingForm = null;
+        const openModal = (form) => {
+          pendingForm = form;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          const input = document.getElementById('subPwdInput');
+          input.value = '';
+          input.focus();
+        };
+        const closeModal = () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          pendingForm = null;
+        };
+        modal.querySelector('#closeSubModal').onclick = closeModal;
+        modal.querySelector('#cancelSubModal').onclick = closeModal;
+        modal.querySelector('#confirmSubModal').onclick = () => {
+          if (!pendingForm) return;
+          const pwd = document.getElementById('subPwdInput').value.trim();
+          if (!pwd) return;
+          const pwdInput = pendingForm.querySelector('input[name="password"]');
+          if (pwdInput) pwdInput.value = pwd;
+          pendingForm.submit();
+          closeModal();
+        };
+
+        document.querySelectorAll('.subscription-form button[type="submit"]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const form = btn.closest('form');
+            if (!form) return;
+            openModal(form);
+          });
+        });
+    })();
+</script>
