@@ -129,12 +129,12 @@ pour générer `scoring/model_credit.pkl`, qui est ensuite chargé via `scoring/
 ## 11. Support / Contact
 📞 Support et contact  
 Pour toute question ou assistance concernant l’installation ou l’utilisation de Banquise, contactez-nous :
-- Email : nuentsa.terrel@gmail.com
+- Email : badoyandaniel@gmail.com
 - Site web : https://banquise.onrender.com
 
 ## 12. Licence
 - Projet protégé par droits d’auteur. Tous droits réservés.
 
 ## 13. Contributeurs
-- Terrel NUENTSA
+- Daniel Badoyan
 - © 2025 Banquise. Tous droits réservés.
