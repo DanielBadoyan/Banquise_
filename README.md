@@ -119,12 +119,12 @@ Modèles et migrations dans `scoring/`. Si `db.sqlite3` absent : `python manage.
 ## 11. Support / Contact
 📞 Support et contact  
 Pour toute question ou assistance concernant l’installation ou l’utilisation de Banquise, contactez-nous :
-- Email : nuentsa.terrel@gmail.com
-- Site web : http://localhost/banquise
+- Email : badoyandaniel@gmail.com
+- Site web :banquise.onrender.com
 
 ## 12. Licence
 - Projet protégé par droits d’auteur. Tous droits réservés.
 
 ## 13. Contributeurs
-- Terrel NUENTSA
+- Daniel Badoyan
 - © 2025 Banquise. Tous droits réservés.
